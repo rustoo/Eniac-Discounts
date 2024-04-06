@@ -1,0 +1,46 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming 'orders_qu' DataFrame contains order information and 'orderlines_qu' contains order lines information
+
+# Count the number of orders for each customer segment
+orders_by_segment = merged_df.groupby('customer_segment')['order_id'].nunique().reset_index()
+orders_by_segment.columns = ['customer_segment', 'total_orders']
+
+# Calculate total revenue for each customer segment
+revenue_by_segment = merged_df.groupby('customer_segment')['total_paid'].sum().reset_index()
+revenue_by_segment['total_revenue'] = revenue_by_segment['total_paid'] / 1e6  # Convert revenue to millions for better readability
+
+# Plot the bar plot for total orders
+plt.figure(figsize=(8, 8))  # Set the aspect ratio to make the plot square
+sns.barplot(data=orders_by_segment, x='customer_segment', y='total_orders', hue='customer_segment', palette='bright', linewidth=0.5)
+plt.xlabel('Customer Segment')
+plt.ylabel('Total Number of Orders')
+plt.title('Contribution of High-Value and Low-Value Customer Segments to Total Number of Orders')
+
+# Add the number of orders above each bar
+for index, row in orders_by_segment.iterrows():
+    plt.text(index, row['total_orders'] + 100, f'{row["total_orders"]}', ha='center', va='bottom')
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Plot the bar plot for total revenue
+plt.figure(figsize=(8, 8))  # Set the aspect ratio to make the plot square
+sns.barplot(data=revenue_by_segment, x='customer_segment', y='total_revenue', hue='customer_segment', palette='bright', linewidth=0.5)
+plt.xlabel('Customer Segment')
+plt.ylabel('Total Revenue (in $M)')
+plt.title('Contribution of High-Value and Low-Value Customer Segments to Total Revenue')
+
+# Add the total revenue above each bar with dynamic text position
+for index, row in revenue_by_segment.iterrows():
+    text_position = row['total_revenue'] + 0.5
+    if text_position > 2:  # Adjust the text position if it's too close to the top
+        text_position = row['total_revenue'] - 0.5
+    plt.text(index, text_position, f'${row["total_revenue"]:.2f} M', ha='center', va='bottom')
+
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
